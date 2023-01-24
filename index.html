@@ -1,0 +1,74 @@
+<!DOCTYPE html >
+< html >
+< head > < title > GPS Tracker </ title > < meta  charset =" utf-8 " >
+< stílus >
+	input ,  textarea { -webkit-box-sizing : border-box; }
+	input { szélesség :  100 % ; betűméret :  20 px ; }
+	textarea { szélesség :  100 % ; magasság :  500 px ; }
+	input [ type = "button" ] ,
+	input [ type = "submit" ] { szélesség :  24 % ; }
+	body { text-align : center; }
+</ style >
+< test >
+< form  action ="" method =" post " >
+	< input  name =" t_action " value =" http://192.168.1.64/gps/save.php " >
+	< textarea  readonly  name =" coords " > </ textarea >
+	< input  value =" Nyomon követés indítása " type =" button " onclick =" startTracking();this.disabled=true; " >
+	< input  value =" Reset Trip " type =" button " onclick =" resetTrip(); " >
+	< input  value =" A kiszolgáló használata " type =" gomb " onclick =" this.form.t_action.value = 'savetrip.php'; " >
+	< input  type =" submit " onclick =" this.form.action = this.form.t_action.value; " >
+</ form >
+< script >
+var  ta  =  dokumentum . querySelector ( 'textarea' ) ;
+var  lt  =  0 ;
+var  ls  =  false ;
+var  track  =  false ;
+( függvény ( )  {
+	var  tr  =  localStorage . getItem ( 'trip' ) ;
+	if  ( tr  !=  ''  &&  tr  !=  null )  {
+		ta . érték  =  tr  +  '\n' ;
+	}
+} ) ( ) ;
+function  addHeader ( )  {
+	ta . value  +=  '-- követés indult: '  +  ( new  Date ( ) . toString ( ) )  +  '\n' ;
+	ta . érték  +=  ( new  Date ( ) . getTime ( ) )  +  ' // start\n' ;
+	localStorage . setItem ( ' utazás ' ,  ta . érték ) ;
+}
+function  resetTrip ( )  {
+	if  ( ! megerősítés ( 'Biztosan törölni akarja az utazást?' ) )
+		return  false ;
+	localStorage . setItem ( ' utazás' ,  '' ) ;
+	ta . érték  =  '' ;
+	fejléc hozzáadása ( ) ;
+}
+function  startTracking ( )  {
+	track  =  igaz ;
+	fejléc hozzáadása ( ) ;
+	navigátor . földrajzi helymeghatározás . watchPosition (
+		function ( pozíció )  {
+			var  now  =  new  Dátum ( ) . getTime ( ) ;
+			if  ( ls  !=  1  ||  most  -  lt  >  10000 )  {
+				ta . érték  +=  most  +  ' // '  +  pozíció . koordináták . szélesség  +  ' // '  +  pozíció . koordináták . hosszúság  +  '\n' ;
+				localStorage . setItem ( ' utazás ' ,  ta . érték ) ;
+				lt  =  most ;
+				ls  =  1 ;
+			}
+		} ,
+		függvény ( )  {
+			var  now  =  new  Dátum ( ) . getTime ( ) ;
+			if  ( ls  !=  0  ||  most  -  lt  >  10000 )  {
+				ta . érték  +=  most  +  ' // sikertelen\n' ;
+				localStorage . setItem ( ' utazás ' ,  ta . érték ) ;
+				lt  =  most ;
+				ls  =  0 ;
+			}
+		} ,
+		{
+			enableHighAccuracy : igaz ,
+			maximális életkor : 60000 ,
+			időtúllépés : 15000
+		}
+	) ;
+}
+</ script >
+</ body >
